@@ -23,16 +23,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-ircbot</artifactId>
-    <version>8.1-SNAPSHOT</version>
+    <groupId>org.xwiki.contrib</groupId>
+    <artifactId>application-ircbot</artifactId>
+    <version>9.0-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-platform-ircbot-api</artifactId>
-  <name>XWiki Platform - IRC Bot - API</name>
+  <artifactId>application-ircbot-api</artifactId>
+  <name>IRC Bot - API</name>
   <packaging>jar</packaging>
   <description>Java API for the IRC Bot Application</description>
   <properties>
     <xwiki.jacoco.instructionRatio>0.60</xwiki.jacoco.instructionRatio>
+    <!-- Old names of this module used for retro compatibility when resolving dependencies of old extensions -->
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ircbot-api</xwiki.extension.features>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>IRC Bot API</xwiki.extension.name>
+    <!-- Extension Manager category -->
+    <xwiki.extension.category>api</xwiki.extension.category>
   </properties>
   <dependencies>
     <dependency>
@@ -53,12 +59,12 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-bridge</artifactId>
-      <version>${project.version}</version>
+      <version>${platform.version}</version>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${project.version}</version>
+      <version>${platform.version}</version>
     </dependency>
     <!-- Dependency for the Broken Links Event Listener -->
     <dependency>
@@ -67,6 +73,12 @@
       <version>${rendering.version}</version>
     </dependency>
     <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
+      <version>${commons.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
