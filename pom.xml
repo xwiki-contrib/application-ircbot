@@ -87,6 +87,12 @@
                 <name>screenshotDirectory</name>
                 <value>${basedir}/target/screenshots</value>
               </property>
+              <!-- This property makes it simple for some module to exclude the check (for example for functional
+                   tests) -->
+              <property>
+                <name>xwiki.surefire.captureconsole.skip</name>
+                <value>${xwiki.surefire.captureconsole.skip}</value>
+              </property>
             </systemProperties>
             <!-- Verify that unit tests don't output anything to stdout/stderr -->
             <properties>
@@ -96,6 +102,13 @@
               </property>
             </properties>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.xwiki.commons</groupId>
+              <artifactId>xwiki-commons-tool-test-simple</artifactId>
+              <version>${commons.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>
