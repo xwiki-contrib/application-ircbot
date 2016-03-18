@@ -30,7 +30,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-ircbot</artifactId>
   <name>IRC Bot - Parent POM</name>
-  <version>9.0-SNAPSHOT</version>
+  <version>8.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>IRC Bot Application for XWiki</description>
   <scm>
