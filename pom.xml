@@ -43,6 +43,10 @@
       <id>vmassol</id>
       <name>Vincent Massol</name>
     </developer>
+    <developer>
+      <id>xwikidev</id>
+      <name>XWiki Development Team</name>
+    </developer>
   </developers>
   <properties>
     <rendering.version>${commons.version}</rendering.version>
