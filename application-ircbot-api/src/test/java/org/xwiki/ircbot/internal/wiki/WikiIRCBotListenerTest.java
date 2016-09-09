@@ -34,13 +34,13 @@ import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.managers.ThreadedListenerManager;
 import org.slf4j.Logger;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.ircbot.IRCBotException;
 import org.xwiki.ircbot.internal.ExtendedPircBotX;
 import org.xwiki.ircbot.wiki.WikiIRCModel;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.internal.transformation.MutableRenderingContext;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.transformation.RenderingContext;
@@ -65,11 +65,9 @@ public class WikiIRCBotListenerTest extends AbstractComponentTestCase
         private Logger logger;
 
         public TestableWikiIRCBotListener(WikiBotListenerData listenerData, Map<String, XDOM> events, Syntax syntax,
-            RenderingContext renderingContext, Transformation macroTransformation, BlockRenderer plainTextBlockRenderer,
-            WikiIRCModel ircModel, DocumentReference executingUserReference)
+            DocumentReference executingUserReference, ComponentManager componentManager) throws IRCBotException
         {
-            super(listenerData, events, syntax, renderingContext, macroTransformation, plainTextBlockRenderer, ircModel,
-                executingUserReference);
+            super(listenerData, events, syntax, executingUserReference, componentManager);
         }
 
         public void setLogger(Logger logger)
@@ -99,17 +97,17 @@ public class WikiIRCBotListenerTest extends AbstractComponentTestCase
             "space.page", "name", "description");
         Map<String, XDOM> events = new HashMap<String, XDOM>();
         events.put("onMessage", new XDOM(Collections.<Block>emptyList()));
-        final RenderingContext renderingContext = getMockery().mock(MutableRenderingContext.class);
-        final Transformation macroTransformation = getMockery().mock(Transformation.class);
-        final BlockRenderer renderer = getMockery().mock(BlockRenderer.class);
-        final WikiIRCModel ircModel = getMockery().mock(WikiIRCModel.class);
+        registerMockComponent(RenderingContext.class);
+        registerMockComponent(Transformation.class);
+        registerMockComponent(BlockRenderer.class, "plain/1.0");
+        WikiIRCModel ircModel = registerMockComponent(WikiIRCModel.class);
 
         Utils.setComponentManager(getComponentManager());
         final XWikiContext xwikiContext = new XWikiContext();
 
         final DocumentReference userReference = new DocumentReference("userwiki", "userspace", "userpage");
         WikiIRCBotListener listener = new TestableWikiIRCBotListener(data, events, Syntax.XWIKI_2_1,
-            renderingContext, macroTransformation, renderer, ircModel, userReference);
+            userReference, getComponentManager());
 
         Event event = createTestEvent();
 
@@ -142,17 +140,17 @@ public class WikiIRCBotListenerTest extends AbstractComponentTestCase
                 "space.page", "name", "description");
         Map<String, XDOM> events = new HashMap<String, XDOM>();
         events.put("onMessage", new XDOM(Collections.<Block>emptyList()));
-        final RenderingContext renderingContext = getMockery().mock(MutableRenderingContext.class);
-        final Transformation macroTransformation = getMockery().mock(Transformation.class);
-        final BlockRenderer renderer = getMockery().mock(BlockRenderer.class);
-        final WikiIRCModel ircModel = getMockery().mock(WikiIRCModel.class);
+        registerMockComponent(RenderingContext.class);
+        registerMockComponent(Transformation.class);
+        registerMockComponent(BlockRenderer.class, "plain/1.0");
+        WikiIRCModel ircModel = registerMockComponent(WikiIRCModel.class);
 
         Utils.setComponentManager(getComponentManager());
         final XWikiContext xwikiContext = new XWikiContext();
 
         final DocumentReference userReference = new DocumentReference("userwiki", "userspace", "userpage");
         TestableWikiIRCBotListener listener = new TestableWikiIRCBotListener(data, events, Syntax.XWIKI_2_1,
-            renderingContext, macroTransformation, renderer, ircModel, userReference);
+            userReference, getComponentManager());
 
         final Logger logger = getMockery().mock(Logger.class);
         listener.setLogger(logger);
