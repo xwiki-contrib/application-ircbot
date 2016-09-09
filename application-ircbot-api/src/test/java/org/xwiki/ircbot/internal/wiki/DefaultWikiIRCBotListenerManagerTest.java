@@ -40,7 +40,6 @@ import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.WordBlock;
 import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.internal.transformation.MutableRenderingContext;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.transformation.RenderingContext;
@@ -74,7 +73,7 @@ public class DefaultWikiIRCBotListenerManagerTest extends AbstractMockingCompone
     @Before
     public void configure() throws Exception
     {
-        final WikiIRCModel ircModel = getComponentManager().getInstance(WikiIRCModel.class);
+        WikiIRCModel ircModel = registerMockComponent(WikiIRCModel.class);
 
         // Assume we have two Wiki Bot Listeners in the wiki
         final WikiBotListenerData listenerData1 = new WikiBotListenerData(
@@ -89,17 +88,16 @@ public class DefaultWikiIRCBotListenerManagerTest extends AbstractMockingCompone
         this.wikiBotListenerReference1 = new DocumentReference("wiki1", "space1", "page1");
         this.wikiBotListenerReference2 = new DocumentReference("wiki2", "space2", "page2");
 
-        RenderingContext renderingContext = getMockery().mock(MutableRenderingContext.class);
-        Transformation macroTransformation = getMockery().mock(Transformation.class);
-        BlockRenderer plainTextRenderer = getMockery().mock(BlockRenderer.class);
+        registerMockComponent(RenderingContext.class);
+        registerMockComponent(Transformation.class, "macro");
+        registerMockComponent(BlockRenderer.class, "plain/1.0");
+
         this.wikiIRCBotListener1 = new WikiIRCBotListener(listenerData1,
             Collections.singletonMap("onSomeEvent1", new XDOM(Arrays.asList((Block) new WordBlock("whatever1")))),
-                Syntax.XWIKI_2_1, renderingContext, macroTransformation, plainTextRenderer, ircModel,
-                    new DocumentReference("userwiki1", "userspace1", "userpage1"));
+                Syntax.XWIKI_2_1, new DocumentReference("userwiki1", "userspace1", "userpage1"), getComponentManager());
         this.wikiIRCBotListener2 = new WikiIRCBotListener(listenerData2,
             Collections.singletonMap("onSomeEvent2", new XDOM(Arrays.asList((Block) new WordBlock("whatever2")))),
-                Syntax.XWIKI_2_1, renderingContext, macroTransformation, plainTextRenderer, ircModel,
-                    new DocumentReference("userwiki2", "userspace2", "userpage2"));
+                Syntax.XWIKI_2_1, new DocumentReference("userwiki2", "userspace2", "userpage2"), getComponentManager());
         final IRCBot bot = getComponentManager().getInstance(IRCBot.class);
         this.listenerManager = getMockery().mock(ListenerManager.class);
 

@@ -21,6 +21,8 @@ package org.xwiki.ircbot.internal.wiki;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pircbotx.hooks.Event;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.ircbot.IRCBotException;
 import org.xwiki.ircbot.wiki.WikiIRCModel;
 import org.xwiki.rendering.block.XDOM;
@@ -33,6 +35,7 @@ import org.xwiki.rendering.transformation.RenderingContext;
 import org.xwiki.rendering.transformation.Transformation;
 import org.xwiki.rendering.transformation.TransformationContext;
 import org.xwiki.rendering.transformation.TransformationException;
+import org.xwiki.rendering.util.ErrorBlockGenerator;
 
 /**
  * Renders XDOM and send the result to the IRC Channel.
@@ -42,6 +45,8 @@ import org.xwiki.rendering.transformation.TransformationException;
  */
 public class DefaultExecutor implements WikiIRCModel.Executor
 {
+    private ComponentManager componentManager;
+
     /**
      * @see #DefaultExecutor
      */
@@ -61,7 +66,7 @@ public class DefaultExecutor implements WikiIRCModel.Executor
      * Used to find out if the rendered script content has some macro errors or not. If so then we throw an exception
      * to let the user know that the IRC Bot Listener has failed somewhere...
      */
-    private MacroErrorManager macroErrorManager = new MacroErrorManager();
+    private MacroErrorManager macroErrorManager;
 
     /**
      * @see DefaultExecutor
@@ -83,19 +88,19 @@ public class DefaultExecutor implements WikiIRCModel.Executor
      * @param syntax the Syntax in which the Macros are written
      * @param event the IRC Bot Event that the Wiki Bot Listener is responding to and that we use to send back the
      *        rendered content to the IRC Channel
-     * @param renderingContext the rendering context we need to keep updated for proper right management.
-     * @param macroTransformation the Macro transformation to transform the passed XDOM and execute the Macros in it
-     * @param plainTextBlockRenderer the Renderer to use to transform the XDOM into some plain text to send to the IRC
+     * @param componentManager the Component Manager to use to look up other components
+     * @throws ComponentLookupException if some internally required components couldn't be found
      */
-    public DefaultExecutor(XDOM xdom, Syntax syntax, Event event, RenderingContext renderingContext,
-        Transformation macroTransformation, BlockRenderer plainTextBlockRenderer)
+    public DefaultExecutor(XDOM xdom, Syntax syntax, Event event, ComponentManager componentManager)
+        throws ComponentLookupException
     {
         this.xdom = xdom;
         this.syntax = syntax;
         this.event = event;
-        this.renderingContext = renderingContext;
-        this.macroTransformation = macroTransformation;
-        this.plainTextBlockRenderer = plainTextBlockRenderer;
+        this.renderingContext = componentManager.getInstance(RenderingContext.class);
+        this.macroTransformation = componentManager.getInstance(Transformation.class, "macro");
+        this.plainTextBlockRenderer = componentManager.getInstance(BlockRenderer.class, "plain/1.0");
+        this.macroErrorManager = new MacroErrorManager(componentManager.getInstance(ErrorBlockGenerator.class));
     }
 
     @Override
@@ -124,12 +129,13 @@ public class DefaultExecutor implements WikiIRCModel.Executor
 
         // Execute the Macro Transformation on XDOM and send the result to the IRC server
         TransformationContext txContext = new TransformationContext(temporaryXDOM, syntax);
-        ((MutableRenderingContext) renderingContext).transformInContext(macroTransformation, txContext, temporaryXDOM);
+        ((MutableRenderingContext) this.renderingContext).transformInContext(this.macroTransformation, txContext,
+            temporaryXDOM);
 
         DefaultWikiPrinter printer = new DefaultWikiPrinter();
         this.plainTextBlockRenderer.render(temporaryXDOM, printer);
 
-        // Verify if there are any errors in the transformed macro and if throw an exception so that it can be logged
+        // Verify if there are any errors in the transformed macro and if so throw an exception so that it can be logged
         // down the line
         if (this.macroErrorManager.containsError(temporaryXDOM)) {
             throw new IRCBotException(String.format("Macro error when rendering Wiki Bot Listener content [%s]",

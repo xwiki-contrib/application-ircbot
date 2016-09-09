@@ -29,16 +29,15 @@ import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.ircbot.IRCBotException;
 import org.xwiki.ircbot.IRCBotListener;
 import org.xwiki.ircbot.wiki.WikiIRCBotConstants;
 import org.xwiki.ircbot.wiki.WikiIRCModel;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.rendering.transformation.RenderingContext;
-import org.xwiki.rendering.transformation.Transformation;
 
 import com.xpn.xwiki.XWikiContext;
 
@@ -83,27 +82,14 @@ public class WikiIRCBotListener<T extends PircBotX> extends ListenerAdapter<T>
     /**
      * @see #WikiIRCBotListener
      */
-    private RenderingContext renderingContext;
-
-    /**
-     * @see #WikiIRCBotListener
-     */
-    private Transformation macroTransformation;
-
-    /**
-     * @see #WikiIRCBotListener
-     */
-    private BlockRenderer plainTextBlockRenderer;
-
-    /**
-     * @see #WikiIRCBotListener
-     */
     private WikiIRCModel ircModel;
 
     /**
      * @see #WikiIRCBotListener
      */
     private DocumentReference executingUserReference;
+
+    private ComponentManager componentManager;
 
     /**
      * @see #initialize()
@@ -114,25 +100,24 @@ public class WikiIRCBotListener<T extends PircBotX> extends ListenerAdapter<T>
      * @param listenerData the listener data that have been extracted from the wiki page XObject
      * @param events the event scripts that have been extracted from the wiki page XObjects
      * @param syntax the syntax of the wiki page that contained the Bot Listener XObjects
-     * @param renderingContext the rendering context that we need to keep updated for right management.
-     * @param macroTransformation the macro transformation that we'll run to execute the event scripts
-     * @param plainTextBlockRenderer the renderer that we'll use to render the parsed event scripts into plain text.
-     *        If the rendering has non empty text then this text is sent to the IRC channel
-     * @param ircModel used to access the XWiki Context
      * @param executingUserReference the reference to the user under which the Wiki Bot Listener will executed its
+     * @param componentManager the Component Manager to use to look up other components
+     * @throws IRCBotException if some internally required components couldn't be found
      */
     public WikiIRCBotListener(WikiBotListenerData listenerData, Map<String, XDOM> events, Syntax syntax,
-        RenderingContext renderingContext, Transformation macroTransformation, BlockRenderer plainTextBlockRenderer,
-        WikiIRCModel ircModel, DocumentReference executingUserReference)
+        DocumentReference executingUserReference, ComponentManager componentManager) throws IRCBotException
     {
         this.listenerData = listenerData;
         this.events = events;
         this.syntax = syntax;
-        this.renderingContext = renderingContext;
-        this.macroTransformation = macroTransformation;
-        this.plainTextBlockRenderer = plainTextBlockRenderer;
-        this.ircModel = ircModel;
+        this.componentManager = componentManager;
         this.executingUserReference = executingUserReference;
+
+        try {
+            this.ircModel = componentManager.getInstance(WikiIRCModel.class);
+        } catch (ComponentLookupException e) {
+            throw new IRCBotException("Failed to locate some required components", e);
+        }
     }
 
     @Override
@@ -237,8 +222,7 @@ public class WikiIRCBotListener<T extends PircBotX> extends ListenerAdapter<T>
         // Bot Listener. The reason is that the XDOM might use privileged API that require some special rights
         // (like Programming Rights if it contains a Groovy macro for example).
         this.ircModel.executeAsUser(this.executingUserReference, this.listenerData.getReference(),
-            new DefaultExecutor(xdom, this.syntax, event, this.renderingContext, this.macroTransformation,
-                this.plainTextBlockRenderer));
+            new DefaultExecutor(xdom, this.syntax, event, this.componentManager));
     }
 
     /**

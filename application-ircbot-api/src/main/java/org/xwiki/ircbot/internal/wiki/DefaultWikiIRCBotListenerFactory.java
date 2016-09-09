@@ -37,12 +37,9 @@ import org.xwiki.ircbot.wiki.WikiIRCModel;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.internal.parser.MissingParserException;
 import org.xwiki.rendering.parser.ContentParser;
+import org.xwiki.rendering.parser.MissingParserException;
 import org.xwiki.rendering.parser.ParseException;
-import org.xwiki.rendering.renderer.BlockRenderer;
-import org.xwiki.rendering.transformation.RenderingContext;
-import org.xwiki.rendering.transformation.Transformation;
 
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
@@ -57,9 +54,6 @@ import com.xpn.xwiki.objects.BaseObject;
 @Singleton
 public class DefaultWikiIRCBotListenerFactory implements WikiIRCBotListenerFactory, WikiIRCBotConstants
 {
-    /**
-     * The {@link org.xwiki.component.manager.ComponentManager} component.
-     */
     @Inject
     private ComponentManager componentManager;
 
@@ -68,26 +62,6 @@ public class DefaultWikiIRCBotListenerFactory implements WikiIRCBotListenerFacto
      */
     @Inject
     private Logger logger;
-
-    /**
-     * Used to update the rendering context.
-     */
-    @Inject
-    private RenderingContext renderingContext;
-
-    /**
-     * Used to execute the Bot Listener's event scripts.
-     */
-    @Inject
-    @Named("macro")
-    private Transformation macroTransformation;
-
-    /**
-     * Used to execute the Bot Listener's event scripts.
-     */
-    @Inject
-    @Named("plain/1.0")
-    private BlockRenderer plainTextBlockRenderer;
 
     /**
      * Used to compute the id for a Wiki Bot Listener (it's the serialized form of the page containing the Objects).
@@ -156,8 +130,7 @@ public class DefaultWikiIRCBotListenerFactory implements WikiIRCBotListenerFacto
         // and renders its XDOM. The reason is that the XDOM might use privileged API that require some special rights
         // (like Programming Rights if it contains a Groovy macro for example).
         WikiIRCBotListener listener = new WikiIRCBotListener(botListenerData, events, doc.getSyntax(),
-            renderingContext, this.macroTransformation, this.plainTextBlockRenderer, this.ircModel,
-            this.ircModel.getXWikiContext().getUserReference());
+            this.ircModel.getXWikiContext().getUserReference(), this.componentManager);
 
         // Call Wiki Bot Listener initialization.
         listener.initialize();
