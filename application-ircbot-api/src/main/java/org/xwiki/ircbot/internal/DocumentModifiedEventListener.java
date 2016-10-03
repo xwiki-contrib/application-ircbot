@@ -259,7 +259,13 @@ public class DocumentModifiedEventListener implements EventListener
                 // Return a diff URL since the action done was a modification
                 queryString = String.format("viewer=changes&amp;rev2=%s", source.getVersion());
             }
-            url = source.getExternalURL("view", queryString, xcontext);
+            // Handle the case when no URL Factory is set up yet. This could happen for example when a mandatory class
+            // is created at startup since that's done before the URL Factory is defined.
+            if (xcontext.getURLFactory() == null) {
+                url = "<no URL to display since wiki has not finished intializing yet>";
+            } else {
+                url = source.getExternalURL("view", queryString, xcontext);
+            }
         } catch (Exception e) {
             // Ensures that an error in computing the URL won't prevent sending a message on the IRC channel
             url = String.format("Failed to compute URL for document [%s] and query string [%s]",

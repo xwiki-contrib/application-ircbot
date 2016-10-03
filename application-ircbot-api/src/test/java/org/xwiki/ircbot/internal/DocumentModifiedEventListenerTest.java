@@ -42,6 +42,7 @@ import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.web.XWikiURLFactory;
 
 /**
  * Unit tests for {@link DocumentModifiedEventListener}.
@@ -86,6 +87,7 @@ public class DocumentModifiedEventListenerTest
 
         xcontext = mock(XWikiContext.class);
         when(xcontext.getUserReference()).thenReturn(userReference);
+        when(xcontext.getURLFactory()).thenReturn(mock(XWikiURLFactory.class));
 
         document = mock(XWikiDocument.class);
         when(document.getDocumentReference()).thenReturn(documentReference);
