@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.xwiki.bridge.event.DocumentCreatedEvent;
+import org.xwiki.bridge.event.DocumentDeletedEvent;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.ircbot.DocumentModifiedEventListenerConfiguration;
@@ -93,6 +94,7 @@ public class DocumentModifiedEventListenerTest
         when(document.getDocumentReference()).thenReturn(documentReference);
         when(document.getComment()).thenReturn("comment");
         when(document.getExternalURL("view", null, xcontext)).thenReturn("http://someurl");
+        when(document.getAuthorReference()).thenReturn(userReference);
     }
 
     @Test
@@ -125,14 +127,34 @@ public class DocumentModifiedEventListenerTest
     }
 
     @Test
+    public void onEventWhenDocumentDeleted() throws Exception
+    {
+        mocker.getComponentUnderTest().onEvent(new DocumentDeletedEvent(documentReference), document, xcontext);
+
+        verify(bot, times(1)).sendMessage("channel",
+            "wiki:space.page was deleted by userwiki:userspace.userpage (comment) - " + "http://someurl");
+    }
+
+    @Test
     public void onEventWhenDocumentCreatedAndGuestUser() throws Exception
     {
-        when(xcontext.getUserReference()).thenReturn(null);
+        when(document.getAuthorReference()).thenReturn(null);
 
         mocker.getComponentUnderTest().onEvent(new DocumentCreatedEvent(documentReference), document, xcontext);
 
         verify(bot, times(1)).sendMessage("channel",
             "wiki:space.page was created by Guest (comment) - " + "http://someurl");
+    }
+
+    @Test
+    public void onEventWhenDocumentDeletedAndGuestUser() throws Exception
+    {
+        when(xcontext.getUserReference()).thenReturn(null);
+
+        mocker.getComponentUnderTest().onEvent(new DocumentDeletedEvent(documentReference), document, xcontext);
+
+        verify(bot, times(1)).sendMessage("channel",
+            "wiki:space.page was deleted by Guest (comment) - " + "http://someurl");
     }
 
     @Test

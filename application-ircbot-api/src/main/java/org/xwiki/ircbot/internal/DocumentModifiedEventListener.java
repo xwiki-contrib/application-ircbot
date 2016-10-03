@@ -128,7 +128,7 @@ public class DocumentModifiedEventListener implements EventListener
                     String message = String.format("%s was %s by %s%s - %s",
                         referenceAsString,
                         getNotificationAction(event),
-                        getNotificationAuthor(xcontext),
+                        getNotificationAuthor(event, document, xcontext),
                         getNotificationComment(document),
                         getNotificationURL(event, document, xcontext));
 
@@ -186,15 +186,23 @@ public class DocumentModifiedEventListener implements EventListener
     /**
      * Get the author name that we want to print in the notification message we send to the IRC channel.
      *
-     * @param xcontext the XWiki Context from which we extract the current user
+     * @param event the event that happened. We need it to handle creation & modification differently than deletion
+     * @param document the document that has been modified, created or deleted. We need to extract the author for
+     *        creations and modifications
+     * @param xcontext the XWiki Context from which we extract the current user for deletions
      * @return the author name
-     * @throws IRCBotException if we cannot access the XWikiContext
      */
-    private String getNotificationAuthor(XWikiContext xcontext) throws IRCBotException
+    private String getNotificationAuthor(Event event, XWikiDocument document, XWikiContext xcontext)
     {
         String user;
 
-        DocumentReference userReference = xcontext.getUserReference();
+        DocumentReference userReference;
+        if (event instanceof DocumentDeletedEvent) {
+            userReference = xcontext.getUserReference();
+        } else {
+            userReference = document.getAuthorReference();
+        }
+
         if (userReference != null) {
             user = this.serializer.serialize(userReference);
         } else {
