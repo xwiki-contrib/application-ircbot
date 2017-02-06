@@ -11,4 +11,4 @@ IRC Bot (logging, wiki page notifications, wiki search, jira search, jira URL cr
 * License: LGPL 2.1
 * Translations: N/A
 * Sonar Dashboard: N/A
-* Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20IRC%20Bot%20Application)](http://ci.xwiki.org/job/Contrib%20-%20IRC%20Bot%20Application/)
+* Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=XWiki Contrib/application-ircbot/master)](http://ci.xwiki.org/view/Contrib/job/XWiki%20Contrib/job/application-ircbot/job/master/)
