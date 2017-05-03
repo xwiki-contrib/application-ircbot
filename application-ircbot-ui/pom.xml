@@ -35,7 +35,7 @@
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
     <!-- Old names of this module used for retro compatibility when resolving dependencies of old extensions -->
-    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ircbot,org.xwiki.platform:xwiki-platform-ircbot-ui</xwiki.extension.features>
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ircbot-ui,org.xwiki.platform:xwiki-platform-ircbot</xwiki.extension.features>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>IRC Bot Application</xwiki.extension.name>
     <!-- Extension Manager category -->
